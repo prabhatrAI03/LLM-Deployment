@@ -1,0 +1,12 @@
+
+services:
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vllm-fastapi-day7
+    ports:
+      - "3002:3002"
+    env_file:
+      - .env
+    restart: unless-stopped
