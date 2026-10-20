@@ -44,11 +44,7 @@ app = FastAPI(
 # --------------------------------------------------
 
 class ChatRequest(BaseModel):
-    message: str = Field(
-        ...,
-        min_length=1,
-        description="The user's message",
-    )
+    message: str = Field(..., min_length=1, description="The user's message", )
     max_tokens: int = Field(default=256, ge=1, le=2048)
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
 
@@ -151,6 +147,6 @@ async def chat(request: ChatRequest):
 if __name__ == "__main__":
     uvicorn.run(
         app,
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=3002,
     )
