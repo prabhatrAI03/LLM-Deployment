@@ -1,0 +1,13 @@
+[Unit]
+Description=FastAPI vLLM Client
+After=network.target
+
+[Service]
+User=linux_prabhat
+WorkingDirectory=/mnt/c/Users/LOQ/Desktop/LLM deployment/vLLM
+ExecStart=/mnt/c/Users/LOQ/Desktop/LLM deployment/venv/bin/uvicorn L3_fastAPI:app --host 0.0.0.0 --port 3002
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
