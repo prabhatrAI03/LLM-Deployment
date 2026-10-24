@@ -2,3 +2,5 @@
 *.pem
 venv/
 __pycache__/
+.env.*
+!.env.example
