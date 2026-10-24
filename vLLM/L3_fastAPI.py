@@ -1,24 +1,68 @@
 
 import os
+import secrets
 
+from dotenv import load_dotenv
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,Depends
 from openai import AsyncOpenAI, APIConnectionError, APIStatusError
 from pydantic import BaseModel, Field
+from fastapi.security import APIKeyHeader
+
 
 
 # --------------------------------------------------
-# Configuration
+# Configuration and secrets
 # --------------------------------------------------
+
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+
+if not API_KEY:
+    raise RuntimeError(
+        "API_KEY is not configured. Set it in your .env file."
+    )
 
 KAGGLE_PROXY = os.environ.get("KAGGLE_PROXY", "").rstrip("/")
 
 if not KAGGLE_PROXY:
     raise RuntimeError(
-        "KAGGLE_PROXY is not set. Configure it in your WSL terminal."
+        "KAGGLE_PROXY is not set. Configure it in your environment."
     )
 
 MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
+
+
+# --------------------------------------------------
+# API key authentication
+# --------------------------------------------------
+
+api_key_header = APIKeyHeader(
+    name="my-API-Key",
+    auto_error=False,
+)
+
+
+async def verify_api_key(
+    api_key: str | None = Depends(api_key_header),
+) -> None:
+    """Reject requests with a missing or invalid API key."""
+
+    if not api_key or not secrets.compare_digest(
+        api_key, API_KEY
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or missing API key",
+            headers={"WWW-Authenticate": "ApiKey"},
+        )
+
+
+
+# --------------------------------------------------
+# vLLM client
+# --------------------------------------------------
 
 client = AsyncOpenAI(
     base_url=f"{KAGGLE_PROXY}/proxy/8000/v1",
@@ -67,7 +111,7 @@ async def root():
     }
 
 
-@app.get("/health")
+@app.get("/health", dependencies=[Depends(verify_api_key)])
 async def health():
     return {
         "status": "running",
@@ -77,7 +121,7 @@ async def health():
     }
 
 
-@app.get("/models")
+@app.get("/models", dependencies=[Depends(verify_api_key)])
 async def list_models():
     """Check connectivity and retrieve models served by vLLM."""
     try:
@@ -100,7 +144,7 @@ async def list_models():
         )
 
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat", response_model=ChatResponse,  dependencies=[Depends(verify_api_key)],)
 async def chat(request: ChatRequest):
     """Send a message to the model served by vLLM."""
     try:
