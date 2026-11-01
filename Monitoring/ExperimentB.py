@@ -58,7 +58,7 @@ def worker(worker_id, deadline):
                 }
             ],
             "max_tokens": MAX_TOKENS,
-            "temperature": 0.7
+            "temperature": 0.6
         }
 
         start = time.perf_counter()
