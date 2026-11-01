@@ -21,7 +21,7 @@ def send_request(i):
             }
         ],
         "max_tokens": 1000,
-        "temperature": 0.7
+        "temperature": 0.6
     }
 
     response = requests.post(url, json=payload, timeout=180)
