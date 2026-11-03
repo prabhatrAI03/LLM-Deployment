@@ -3,6 +3,17 @@ global:
   scrape_interval: 5s
   evaluation_interval: 5s
 
+# Send alerts to Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - "alertmanager:9093"
+
+# Load alert rules
+rule_files:
+  - "/etc/prometheus/alert_rules.yml"
+
 scrape_configs:
 
   # Prometheus self-monitoring
@@ -21,3 +32,8 @@ scrape_configs:
 
     static_configs:
       - targets: ["host.docker.internal:9100"]
+
+  # Alertmanager self-monitoring
+  - job_name: alertmanager
+    static_configs:
+      - targets: ["alertmanager:9093"]

@@ -1,0 +1,33 @@
+groups:
+  - name: llm_deployment_alerts
+    rules:
+
+      # Detect unavailable vLLM metrics gateway
+      - alert: VLLMMetricsGatewayDown
+        expr: up{job="vllm"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "vLLM metrics gateway is down"
+          description: "Prometheus cannot scrape the vLLM metrics gateway."
+
+      # Detect Prometheus target failure
+      - alert: PrometheusTargetDown
+        expr: up{job="prometheus"} == 0
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus target is unavailable"
+          description: "Prometheus self-monitoring target is down."
+
+      # Detect Alertmanager failure
+      - alert: AlertmanagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alertmanager is down"
+          description: "Prometheus cannot scrape Alertmanager."

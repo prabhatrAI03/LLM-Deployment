@@ -1,3 +1,4 @@
+
 services:
   prometheus:
     image: prom/prometheus
@@ -7,7 +8,10 @@ services:
       - "127.0.0.1:9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
       - prometheus_data:/prometheus
+    depends_on:
+      - alertmanager
 
   grafana:
     image: grafana/grafana
@@ -20,6 +24,17 @@ services:
     depends_on:
       - prometheus
 
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+
 volumes:
   prometheus_data:
   grafana_data:
+  alertmanager_data:
